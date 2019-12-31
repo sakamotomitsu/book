@@ -1,72 +1,33 @@
 <template>
-  <div class="container">
-    <div>
-      <logo />
-      <h1 class="title">
-        book
-      </h1>
-      <h2 class="subtitle">
-        My gnarly Nuxt.js project
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
-    </div>
+  <div>
+    <p>ISBN：{{ code }}</p>
+    <p>タイトル：{{ name }}</p>
+    <p>著者：{{ person }}</p>
+    <p>出版社：{{ publisher }}</p>
+    <img :src="img" :alt="name">
   </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import axios from 'axios'
 
 export default {
-  components: {
-    Logo
+  async asyncData ({ params }) {
+    const url = 'https://api.openbd.jp/v1/get?isbn=9784757544499'
+    const { data } = await axios.get(url)
+
+    const bookCode = data[0].onix.RecordReference
+    const bookName = data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.content
+    // TODO: 二人いる場合があるので、その処理を
+    const bookPerson = data[0].onix.DescriptiveDetail.Contributor[0].PersonName.content
+    const bookPublisher = data[0].onix.PublishingDetail.Imprint.ImprintName
+    // const bookPrice = data[0].onix.ProductSupply.Price
+    const bookImg = data[0].onix.CollateralDetail.SupportingResource[0].ResourceVersion[0].ResourceLink
+    return { code: bookCode, name: bookName, person: bookPerson, publisher: bookPublisher, img: bookImg }
   }
 }
 </script>
 
 <style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
 
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
 </style>
